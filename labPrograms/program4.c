@@ -1,99 +1,105 @@
 #include<stdio.h>
-#include<stdlib.h>
+#include<malloc.h>
 
-typedef struct Node{
-    int co, po;
-    struct Node* next;
-} node;
+typedef struct polynomial{
+	int co, po;
+	struct polynomial* next;
+} poly;
 
-node* insertEnd(node* head, int co,int po){
-    node* n = (node*)malloc(sizeof(node));
-    n->co = co;
-    n->po = po;
-    n->next = NULL;
-    if(head == NULL) return n;
-
-    node* temp = head;
-    while(temp->next){
-        temp = temp->next;
-    }
-    temp->next = n;
-    return head;
+poly* getnode(int co, int po){
+	poly *temp = (poly*) malloc(sizeof(poly));
+	temp->po = po;
+	temp->co = co;
+	temp->next = NULL;
+	return temp;
 }
 
-node* add(node* res, int co, int po){
-    node* n = (node*) malloc(sizeof(node));
-    n->co = co;
-    n->po = po;
-    n->next = NULL;
-    if(res == NULL){
-        return n;
-    }
-    node* temp = res;
-    while(temp!=NULL){
-        if(temp->po == po){
-            temp->co += co;
-            return res;
-        }
-        temp = temp->next;
-    }
-    if(temp==NULL){
-        res = insertEnd(res, co,po);
-    }
-    return res;
+poly* insertrear(int co, int po, poly* p){
+	poly* newnode = getnode(co, po);
+	if(p==NULL) return newnode;
+	poly* temp = p;
+	int flag = 0;
+	while(temp->next!=NULL){
+		if(temp->po == newnode->po){
+			flag = 1;
+			temp->co += newnode->co;
+			break;
+		}
+		temp = temp->next;
+	}
+	if(!flag && temp->po == po){
+		flag = 1;
+		temp->co += co;
+	}
+	if(!flag){
+		temp->next = newnode;
+	}
+	return p;
 }
 
-node* multiply(node* p1, node* p2){
-    node* temp1, *temp2;
-    node* res = NULL;
-    for(temp1 = p1;temp1!=NULL; temp1=temp1->next){
-        for(temp2 = p2;temp2!=NULL; temp2 = temp2->next){
-            res = add(res, temp1->co*temp2->co, temp1->po+temp2->po);
-        }
-    }
-    return res;
+poly* multiply(poly* p1, poly* p2, poly* p3){
+	if(p1 == NULL) return p2;
+	if(p2 == NULL) return p1;
+	poly *p, *q;
+	p = p1;
+	while(p!=NULL){
+		q = p2;
+		while(q!=NULL){
+			p3 = insertrear(p->co*q->co, p->po+q->po, p3);
+			q = q->next;
+		}
+		p = p->next;
+	}
+	return p3;
 }
 
-void display(node* p){
-    if(p==NULL){
-        printf("Empty polynomial\n");
-        return;
-    }
-    node* temp = p;
-    while(temp->next!=NULL){
-        printf(" %d x^ %d + ", temp->co, temp->po);
-        temp = temp->next;
-    }
-    printf(" %d x^ %d \n", temp->co, temp->po);
+void display(poly* p){
+	if(p == NULL){
+		printf("No nodes\n");
+		return;
+	}
+	poly* temp = p;
+	while(temp->next!=NULL){
+		printf("%dx^%d\t+\t", temp->co, temp->po);
+		temp = temp->next;
+	}
+	printf("%dx^%d\t", temp->co, temp->po);	
 }
 
 int main(){
-    node* p1 = NULL, *p2 = NULL, *p = NULL;
-    int m,n,co;
-    printf("Enter number of terms for first polynomial\n");
-    scanf("%d", &n);
-    for(int i=0;i<n;i++){
-        printf("Enter coefficient for x^%d: ", i);
-        scanf("%d", &co);
-        p1 = insertEnd(p1, co, i);
-    }
-    printf("First Polynomial is \n");
-    display(p1);
-
-    printf("Enter number of terms for second polynomial\n");
-    scanf("%d", &m);
-    for(int i=0;i<m;i++){
-        printf("Enter coefficient for x^%d: ", i);
-        scanf("%d", &co);
-        p2 = insertEnd(p2, co, i);
-    }
-    printf("First Polynomial is \n");
-    display(p2);
-
-    p = multiply(p1, p2);
-
-    printf("Product of the two polynomials is \n");
-    display(p);
-
-    return 0;
+	poly *p1 = NULL, *p2 = NULL, *p3 = NULL;
+	int n,c;
+	printf("Enter number of terms for first polynomial\n");
+	scanf("%d", &n);
+	for(int i=0;i<n;i++){
+		printf("Enter coefficient of x^%d : ", n-i-1);
+		scanf("%d", &c);
+		p1 = insertrear(c, n-i-1, p1);
+		printf("\n");
+	}
+	printf("Enter number of terms for second polynomial\n");
+	scanf("%d", &n);
+	for(int i=0;i<n;i++){
+		printf("Enter coefficient of x^%d : ", n-i-1);
+		scanf("%d", &c);
+		p2 = insertrear(c, n-i-1, p2);
+		printf("\n");
+	}
+	
+	p3 = multiply(p1,p2,p3);
+	
+	printf("First polynomial: \n");
+	display(p1);
+	printf("\n");
+	
+	printf("Second polynomial: \n");
+	display(p2);
+	printf("\n");
+	
+	printf("Product: \n");
+	display(p3);
+	printf("\n");
+	
+	return 0;
 }
+	
